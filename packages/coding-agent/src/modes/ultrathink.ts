@@ -8,13 +8,16 @@ import { keywordInProse } from "./markdown-prose";
  * Typing the standalone word in the input editor paints it with a rainbow
  * gradient ({@link highlightUltrathink}); submitting a message that mentions it
  * appends a hidden {@link ULTRATHINK_NOTICE} nudging the model toward careful
- * multi-step reasoning. Matching is whitespace-delimited and case-sensitive
- * (lowercase only), so "ultrathinking", "Ultrathink", or "ultrathink.ts" never
- * trigger either behavior.
+ * multi-step reasoning. Matching is case-sensitive (lowercase only) and
+ * token-bounded: the standalone word counts even when wrapped in punctuation
+ * ("ultrathink.", '"ultrathink"'), but "ultrathinking", "Ultrathink", and
+ * path-embedded forms like "ultrathink.ts" never trigger either behavior.
  */
 
-// Detection: lowercase keyword flanked by whitespace or a string edge. Non-global so `.test` stays stateless.
-const ULTRATHINK_WORD = /(?<!\S)ultrathink(?!\S)/;
+// Detection: lowercase keyword flanked by whitespace or a string edge, allowing wrapping
+// punctuation (`ultrathink.`, `"ultrathink"`) but not punctuation glued to word characters
+// (`ultrathink.ts`). Non-global so `.test` stays stateless.
+const ULTRATHINK_WORD = /(?<=(?:^|\s)[^\w\s]*)ultrathink(?=[^\w\s]*(?:\s|$))/;
 
 /** Hidden system notice appended after a user message that mentions "ultrathink". */
 export const ULTRATHINK_NOTICE: string = ultrathinkNotice.trim();
@@ -35,7 +38,7 @@ export function containsUltrathink(text: string): boolean {
  */
 export const highlightUltrathink: KeywordHighlighter = createGradientHighlighter({
 	probe: /ultrathink/,
-	highlight: /(?<!\S)ultrathink(?!\S)/g,
+	highlight: /(?<=(?:^|\s)[^\w\s]*)ultrathink(?=[^\w\s]*(?:\s|$))/g,
 	stops: 14,
 	hue: t => t * 330,
 });

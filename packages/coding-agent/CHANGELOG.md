@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed the magic keywords (`ultrathink`, `orchestrate`, `workflowz`) not glowing or triggering their hidden notices when wrapped in sentence punctuation (`ultrathink.`, `"ultrathink"`); identifier- and path-embedded forms like `ultrathink.ts` still never trigger ([#4965](https://github.com/can1357/oh-my-pi/issues/4965)).
+
 ## [16.3.13] - 2026-07-09
 
 ### Fixed

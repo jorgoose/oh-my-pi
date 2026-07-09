@@ -10,13 +10,16 @@ import { keywordInProse } from "./markdown-prose";
  * amber→green gradient ({@link highlightWorkflow}); submitting a message that
  * mentions it appends a hidden workflow notice that steers the model to author
  * a deterministic multi-subagent workflow through the active task schema.
- * Matching is whitespace-delimited and case-sensitive (lowercase only) —
- * "workflowz" triggers, but "workflowzed", "Workflowz", and "workflowz.ts"
- * never do.
+ * Matching is case-sensitive (lowercase only) and token-bounded: "workflowz"
+ * triggers even when wrapped in punctuation ("workflowz.", '"workflowz"'), but
+ * "workflowzed", "Workflowz", and path-embedded forms like "workflowz.ts" never
+ * do.
  */
 
-// Detection: lowercase keyword flanked by whitespace or a string edge. Non-global so `.test` stays stateless.
-const WORKFLOW_WORD = /(?<!\S)workflowz(?!\S)/;
+// Detection: lowercase keyword flanked by whitespace or a string edge, allowing wrapping
+// punctuation (`workflowz.`, `"workflowz"`) but not punctuation glued to word characters
+// (`workflowz.ts`). Non-global so `.test` stays stateless.
+const WORKFLOW_WORD = /(?<=(?:^|\s)[^\w\s]*)workflowz(?=[^\w\s]*(?:\s|$))/;
 
 /** WORKFLOW_NOTICE is the default hidden notice for sessions with batched task calls enabled. */
 export const WORKFLOW_NOTICE: string = renderWorkflowNotice({ taskBatch: true });
@@ -42,7 +45,7 @@ export function containsWorkflow(text: string): boolean {
  */
 export const highlightWorkflow: KeywordHighlighter = createGradientHighlighter({
 	probe: /workflowz/,
-	highlight: /(?<!\S)workflowz(?!\S)/g,
+	highlight: /(?<=(?:^|\s)[^\w\s]*)workflowz(?=[^\w\s]*(?:\s|$))/g,
 	stops: 14,
 	hue: t => 30 + t * 120,
 });

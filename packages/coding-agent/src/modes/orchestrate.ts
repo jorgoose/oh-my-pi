@@ -8,14 +8,17 @@ import { keywordInProse } from "./markdown-prose";
  * Typing the standalone word in the input editor paints it with a cool
  * teal→violet gradient ({@link highlightOrchestrate}); submitting a message that
  * mentions it appends a hidden {@link ORCHESTRATE_NOTICE} that switches the model
- * into multi-agent orchestration mode. Matching is whitespace-delimited and
- * case-sensitive (lowercase only), so "orchestrated", "Orchestrate", or a path
- * like "orchestrate.ts" never trigger either behavior. Replaces the former
- * `/orchestrate` slash command.
+ * into multi-agent orchestration mode. Matching is case-sensitive (lowercase
+ * only) and token-bounded: the standalone word counts even when wrapped in
+ * punctuation ("orchestrate.", '"orchestrate"'), but "orchestrated",
+ * "Orchestrate", and a path like "orchestrate.ts" never trigger either behavior.
+ * Replaces the former `/orchestrate` slash command.
  */
 
-// Detection: lowercase keyword flanked by whitespace or a string edge. Non-global so `.test` stays stateless.
-const ORCHESTRATE_WORD = /(?<!\S)orchestrate(?!\S)/;
+// Detection: lowercase keyword flanked by whitespace or a string edge, allowing wrapping
+// punctuation (`orchestrate.`, `"orchestrate"`) but not punctuation glued to word characters
+// (`orchestrate.ts`). Non-global so `.test` stays stateless.
+const ORCHESTRATE_WORD = /(?<=(?:^|\s)[^\w\s]*)orchestrate(?=[^\w\s]*(?:\s|$))/;
 
 /** Hidden system notice appended after a user message that mentions "orchestrate". */
 export const ORCHESTRATE_NOTICE: string = orchestrateNotice.trim();
@@ -36,7 +39,7 @@ export function containsOrchestrate(text: string): boolean {
  */
 export const highlightOrchestrate: KeywordHighlighter = createGradientHighlighter({
 	probe: /orchestrate/,
-	highlight: /(?<!\S)orchestrate(?!\S)/g,
+	highlight: /(?<=(?:^|\s)[^\w\s]*)orchestrate(?=[^\w\s]*(?:\s|$))/g,
 	stops: 14,
 	hue: t => 150 + t * 130,
 });

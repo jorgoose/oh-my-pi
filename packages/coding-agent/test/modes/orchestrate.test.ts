@@ -22,7 +22,14 @@ describe("orchestrate keyword detection", () => {
 		expect(containsOrchestrate("do it now\norchestrate")).toBe(true);
 	});
 
-	it("ignores casing, inflections, punctuation-adjacent, and path-embedded forms", () => {
+	it("matches the word wrapped in sentence punctuation", () => {
+		expect(containsOrchestrate("do it. orchestrate.")).toBe(true);
+		expect(containsOrchestrate('the "orchestrate" keyword')).toBe(true);
+		expect(containsOrchestrate("orchestrate, then verify")).toBe(true);
+		expect(containsOrchestrate("(orchestrate)")).toBe(true);
+	});
+
+	it("ignores casing, inflections, and identifier/path-embedded forms", () => {
 		expect(containsOrchestrate("Orchestrate")).toBe(false);
 		expect(containsOrchestrate("ORCHESTRATE")).toBe(false);
 		expect(containsOrchestrate("orchestrated the build")).toBe(false);
@@ -30,9 +37,9 @@ describe("orchestrate keyword detection", () => {
 		expect(containsOrchestrate("a clean orchestration")).toBe(false);
 		expect(containsOrchestrate("it orchestrates well")).toBe(false);
 		expect(containsOrchestrate("reorchestrate everything")).toBe(false);
-		// The reported bug: a path/extension is not whitespace, so the word never triggers.
+		// Punctuation glued to word characters is a path/identifier, not a sentence boundary.
 		expect(containsOrchestrate("packages/coding-agent/src/modes/orchestrate.ts")).toBe(false);
-		expect(containsOrchestrate("do it. orchestrate.")).toBe(false);
+		expect(containsOrchestrate("foo.orchestrate")).toBe(false);
 		expect(containsOrchestrate("nothing to see here")).toBe(false);
 	});
 

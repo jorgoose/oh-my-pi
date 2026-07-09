@@ -2446,7 +2446,7 @@ describe("Editor component", () => {
 	describe("decorateText around the cursor seam", () => {
 		// Editor.#decorate is the only seam that sees both the user prose AND the
 		// trailing CURSOR_MARKER, so a decorator with a right-boundary lookahead
-		// (like the magic-keyword regex /(?<!\S)ultrathink(?!\S)/g) would reject
+		// (like the magic-keyword regexes' whitespace-or-edge boundary) would reject
 		// matches glued to the marker — ESC is non-whitespace. The editor must
 		// split around the marker so each side decorates as if it were a complete
 		// line. This guards the "ultrathink doesn't glow until you type a trailing

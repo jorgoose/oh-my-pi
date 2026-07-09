@@ -22,6 +22,14 @@ describe("highlightMagicKeywords", () => {
 		}
 	});
 
+	it("paints a keyword bounded by sentence punctuation", () => {
+		const input = 'end with ultrathink. or "ultrathink"';
+		const decorated = highlightMagicKeywords(input);
+		expect(Bun.stripANSI(decorated)).toBe(input);
+		// Both occurrences painted ⇒ no contiguous "ultrathink" survives.
+		expect(decorated).not.toContain("ultrathink");
+	});
+
 	it("never paints keywords inside code spans, fenced blocks, or XML sections", () => {
 		const input = "`ultrathink`\n```\norchestrate\n```\n<x>workflowz</x>";
 		expect(highlightMagicKeywords(input)).toBe(input);
@@ -69,6 +77,8 @@ describe("hasMagicKeyword", () => {
 		expect(hasMagicKeyword("please ultrathink this")).toBe(true);
 		expect(hasMagicKeyword("now orchestrate everything")).toBe(true);
 		expect(hasMagicKeyword("just workflowz the steps")).toBe(true);
+		// Sentence punctuation does not defeat the boundary.
+		expect(hasMagicKeyword("please ultrathink.")).toBe(true);
 	});
 
 	it("rejects keywords embedded in longer words or paths", () => {

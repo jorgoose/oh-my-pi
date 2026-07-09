@@ -20,16 +20,20 @@ describe("workflow keyword detection", () => {
 		expect(containsWorkflow("run these workflowz")).toBe(true);
 	});
 
-	it("ignores old triggers, casing, inflections, punctuation-adjacent, and path-embedded forms", () => {
+	it("matches the word wrapped in sentence punctuation", () => {
+		expect(containsWorkflow("do it. workflowz.")).toBe(true);
+		expect(containsWorkflow('the "workflowz" keyword')).toBe(true);
+	});
+
+	it("ignores old triggers, casing, inflections, and identifier/path-embedded forms", () => {
 		expect(containsWorkflow("workflow")).toBe(false);
 		expect(containsWorkflow("workflows")).toBe(false);
 		expect(containsWorkflow("Workflowz")).toBe(false);
 		expect(containsWorkflow("WORKFLOWZ")).toBe(false);
 		expect(containsWorkflow("workflowzed the build")).toBe(false);
 		expect(containsWorkflow("reworkflowz everything")).toBe(false);
-		// A path/extension is not whitespace, so the word never triggers.
+		// Punctuation glued to word characters is a path/identifier, not a sentence boundary.
 		expect(containsWorkflow("packages/coding-agent/test/modes/workflowz.test.ts")).toBe(false);
-		expect(containsWorkflow("do it. workflowz.")).toBe(false);
 		expect(containsWorkflow("nothing to see here")).toBe(false);
 	});
 });
